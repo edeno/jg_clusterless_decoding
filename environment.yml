@@ -1,20 +1,19 @@
-name: analysis_template
+name: jg_clusterless_decoding
 channels:
 - defaults
 - conda-forge
+- edeno
 dependencies:
 - "python>=3.6"
+- loren_frank_data_processing
+- ripple_detection
+- replay_trajectory_classification
+- trajectory_analysis_tools
 - numpy
-- numba
 - scipy
-- scikit-learn
 - matplotlib
 - xarray
 - pandas
-- dask
-- tqdm
-- statsmodels
-- patsy
 - jupyter
 - jupyterlab
 - nb_conda
@@ -22,3 +21,6 @@ dependencies:
 - pytest
 - pytest-cov
 - coveralls
+- pip
+- pip:
+  - nb_black
