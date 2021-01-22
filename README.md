@@ -8,5 +8,7 @@
    ```cd jg_clusterless_decoding```
 3. Create conda environment:
 ```conda env create -f environment.yml```
-4. Make package editable:
+4. Activate conda environment:
+```conda activate jg_clusterless_decoding```
+5. Make package editable:
 ```python setup.py develop```
