@@ -3,7 +3,12 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
-from loren_frank_data_processing.position import _get_pos_dataframe
+from loren_frank_data_processing.core import (get_data_structure,
+                                              reconstruct_time)
+from loren_frank_data_processing import (get_all_multiunit_indicators,
+                                         get_all_spike_indicators, get_LFPs,
+                                         get_trial_time, make_neuron_dataframe,
+                                         make_tetrode_dataframe)
 from src.parameters import ANIMALS, EDGE_ORDER, EDGE_SPACING
 from track_linearization import get_linearized_position, make_track_graph
 
@@ -32,6 +37,31 @@ def get_track_graph():
 
     return make_track_graph(NODE_POSITIONS, EDGES)
 
+
+def _get_pos_dataframe(epoch_key, animals):
+    animal, day, epoch = epoch_key
+    struct = get_data_structure(animals[animal], day, 'pos', 'pos')[epoch - 1]
+    position_data = struct['data'][0, 0]
+    FIELD_NAMES = ['time', 'x_position', 'y_position', 'head_direction',
+                   'speed', 'smoothed_x_position', 'smoothed_y_position',
+                   'smoothed_head_direction', 'smoothed_speed']
+    time = pd.TimedeltaIndex(
+        position_data[:, 0], unit='s', name='time')
+    n_cols = position_data.shape[1]
+
+    if n_cols > 5:
+        # Use the smoothed data if available
+        NEW_NAMES = {'smoothed_x_position': 'x_position',
+                     'smoothed_y_position': 'y_position',
+                     'smoothed_head_direction': 'head_direction',
+                     'smoothed_speed': 'speed'}
+        return (pd.DataFrame(
+            position_data[:, 5:9], columns=FIELD_NAMES[5:9], index=time)
+            .rename(columns=NEW_NAMES))
+    else:
+        return pd.DataFrame(position_data[:, 1:5], columns=FIELD_NAMES[1:5],
+                            index=time)
+    
 
 def get_interpolated_position_info(
         epoch_key, animals, use_HMM=False,
@@ -66,7 +96,37 @@ def load_data(epoch_key):
     logger.info('Loading position information and linearizing...')
     position_info = (get_interpolated_position_info(epoch_key, ANIMALS)
                      .dropna(subset=["linear_position"]))
+    track_graph = get_track_graph()
+    
+    logger.info('Loading multiunits...')
+    tetrode_info = make_tetrode_dataframe(
+        ANIMALS).xs(epoch_key, drop_level=False)
+    tetrode_keys = tetrode_info.loc[tetrode_info.area == 'CA1'].index
+
+    def _time_function(*args, **kwargs):
+        return position_info.index
+
+    multiunits = get_all_multiunit_indicators(
+        tetrode_keys, ANIMALS, _time_function)
+
+    multiunit_spikes = (np.any(~np.isnan(multiunits.values), axis=1)
+                        ).astype(np.float)
+    multiunit_firing_rate = pd.DataFrame(
+        get_multiunit_population_firing_rate(
+            multiunit_spikes, SAMPLING_FREQUENCY), index=position_info.index,
+        columns=['firing_rate'])
+    
+#     logger.info('Loading spikes...')
+#     time = position_info.index
+#     neuron_info = make_neuron_dataframe(ANIMALS).xs(
+#         epoch_key, drop_level=False)
+#     spikes = get_all_spike_indicators(
+#         neuron_info.index, ANIMALS, _time_function).reindex(time)
 
     return {
         'position_info': position_info,
+        'tetrode_info': tetrode_info,
+        'multiunits': multiunits,
+        'multiunit_firing_rate': multiunit_firing_rate,
+        'track_graph': track_graph,
     }
