@@ -3,13 +3,12 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
-from loren_frank_data_processing.core import (get_data_structure,
-                                              reconstruct_time)
 from loren_frank_data_processing import (get_all_multiunit_indicators,
-                                         get_all_spike_indicators, get_LFPs,
-                                         get_trial_time, make_neuron_dataframe,
                                          make_tetrode_dataframe)
-from src.parameters import ANIMALS, EDGE_ORDER, EDGE_SPACING
+from loren_frank_data_processing.core import get_data_structure
+from ripple_detection import get_multiunit_population_firing_rate
+from src.parameters import (ANIMALS, EDGE_ORDER, EDGE_SPACING,
+                            SAMPLING_FREQUENCY)
 from track_linearization import get_linearized_position, make_track_graph
 
 logger = getLogger(__name__)
@@ -61,7 +60,7 @@ def _get_pos_dataframe(epoch_key, animals):
     else:
         return pd.DataFrame(position_data[:, 1:5], columns=FIELD_NAMES[1:5],
                             index=time)
-    
+
 
 def get_interpolated_position_info(
         epoch_key, animals, use_HMM=False,
@@ -97,7 +96,7 @@ def load_data(epoch_key):
     position_info = (get_interpolated_position_info(epoch_key, ANIMALS)
                      .dropna(subset=["linear_position"]))
     track_graph = get_track_graph()
-    
+
     logger.info('Loading multiunits...')
     tetrode_info = make_tetrode_dataframe(
         ANIMALS).xs(epoch_key, drop_level=False)
@@ -115,13 +114,6 @@ def load_data(epoch_key):
         get_multiunit_population_firing_rate(
             multiunit_spikes, SAMPLING_FREQUENCY), index=position_info.index,
         columns=['firing_rate'])
-    
-#     logger.info('Loading spikes...')
-#     time = position_info.index
-#     neuron_info = make_neuron_dataframe(ANIMALS).xs(
-#         epoch_key, drop_level=False)
-#     spikes = get_all_spike_indicators(
-#         neuron_info.index, ANIMALS, _time_function).reindex(time)
 
     return {
         'position_info': position_info,
