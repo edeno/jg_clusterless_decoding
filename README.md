@@ -1,5 +1,4 @@
 # jg_clusterless_decoding
-Repository description goes here.
 
 
 ## Installation
