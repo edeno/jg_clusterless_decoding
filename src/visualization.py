@@ -52,6 +52,7 @@ def plot_classifier_time_slice(
         color="magenta",
         s=1,
         alpha=1,
+        zorder=100,
     )
     axes[0].set_xlabel("")
 
