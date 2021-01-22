@@ -14,6 +14,7 @@ dependencies:
 - matplotlib
 - xarray
 - pandas
+- seaborn
 - jupyter
 - jupyterlab
 - nb_conda
