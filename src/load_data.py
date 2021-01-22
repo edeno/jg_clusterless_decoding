@@ -100,7 +100,22 @@ def load_data(epoch_key):
     logger.info('Loading multiunits...')
     tetrode_info = make_tetrode_dataframe(
         ANIMALS).xs(epoch_key, drop_level=False)
-    tetrode_keys = tetrode_info.loc[tetrode_info.area == 'CA1'].index
+    
+    def n_dead_chans(x):
+        if isinstance(x, float):
+            return 1
+        elif isinstance(x, (list, tuple, np.ndarray)):
+            return len(x)
+
+
+    bad_trode = [9, 16, 21]
+
+    tetrode_keys = tetrode_info.loc[
+        (tetrode_info.area == "CA1")
+        & (tetrode_info.deadchans.apply(lambda x: n_dead_chans(x)) < 4)
+        & ~tetrode_info.nTrode.isin(tetrode_info.ref.dropna().unique())
+        & ~tetrode_info.nTrode.isin(bad_trode)
+    ].index
 
     def _time_function(*args, **kwargs):
         return position_info.index
