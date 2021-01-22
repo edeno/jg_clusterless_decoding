@@ -2,13 +2,11 @@
 
 
 ## Installation
-1. Clone repository:
-   ```git clone https://github.com/edeno/jg_clusterless_decoding.git```
-2. Change to directory:
-   ```cd jg_clusterless_decoding```
-3. Create conda environment:
-```conda env create -f environment.yml```
-4. Activate conda environment:
-```conda activate jg_clusterless_decoding```
-5. Make package editable:
-```python setup.py develop```
+
+```bash
+git clone https://github.com/edeno/jg_clusterless_decoding.git # download repo
+cd jg_clusterless_decoding # change into directory
+conda env create -f environment.yml # create conda environment
+conda activate jg_clusterless_decoding # activate conda environment
+python setup.py develop # make package editable
+```
