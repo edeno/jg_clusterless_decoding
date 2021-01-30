@@ -101,8 +101,8 @@ def load_data(epoch_key):
 
     logger.info('Loading multiunits...')
     tetrode_info = make_tetrode_dataframe(
-        ANIMALS).xs(epoch_key, drop_level=False)
-    
+        ANIMALS, epoch_key=epoch_key)
+
     def n_dead_chans(x):
         if isinstance(x, float):
             return 1
