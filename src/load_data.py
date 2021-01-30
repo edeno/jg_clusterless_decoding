@@ -109,7 +109,7 @@ def load_data(epoch_key):
         elif isinstance(x, (list, tuple, np.ndarray)):
             return len(x)
 
-
+    # Temporarily remove these tetrodes that have bad marks in peanut, 14, 4
     bad_trode = [9, 16, 21]
 
     tetrode_keys = tetrode_info.loc[
