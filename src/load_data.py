@@ -4,6 +4,8 @@ from logging import getLogger
 import numpy as np
 import pandas as pd
 from loren_frank_data_processing import (get_all_multiunit_indicators,
+                                         get_all_spike_indicators,
+                                         make_neuron_dataframe,
                                          make_tetrode_dataframe)
 from loren_frank_data_processing.core import get_data_structure
 from ripple_detection import get_multiunit_population_firing_rate
@@ -130,10 +132,23 @@ def load_data(epoch_key):
             multiunit_spikes, SAMPLING_FREQUENCY), index=position_info.index,
         columns=['firing_rate'])
 
+    neuron_info = make_neuron_dataframe(ANIMALS).xs(
+        epoch_key, drop_level=False)
+    neuron_info = pd.merge(
+        neuron_info,
+        tetrode_info.loc[:, ["area", "suparea"]],
+        left_index=True,
+        right_index=True,
+    )
+    spikes = get_all_spike_indicators(
+        neuron_info.index, ANIMALS, _time_function)
+
     return {
         'position_info': position_info,
         'tetrode_info': tetrode_info,
         'multiunits': multiunits,
         'multiunit_firing_rate': multiunit_firing_rate,
+        'neuron_info': neuron_info,
+        'spikes': spikes,
         'track_graph': track_graph,
     }
