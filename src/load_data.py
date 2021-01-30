@@ -132,6 +132,7 @@ def load_data(epoch_key):
             multiunit_spikes, SAMPLING_FREQUENCY), index=position_info.index,
         columns=['firing_rate'])
 
+    logger.info('Loading sorted spikes...')
     neuron_info = make_neuron_dataframe(ANIMALS).xs(
         epoch_key, drop_level=False)
     neuron_info = pd.merge(
