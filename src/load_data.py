@@ -141,6 +141,8 @@ def load_data(epoch_key):
         left_index=True,
         right_index=True,
     )
+    neuron_info = neuron_info.loc[neuron_info.accepted.astype(bool)]
+
     spikes = get_all_spike_indicators(
         neuron_info.index, ANIMALS, _time_function)
 
