@@ -27,3 +27,20 @@ EDGE_ORDER = np.asarray([
 ])
 
 EDGE_SPACING = 15
+
+
+state_names = ["Continuous", "Fragmented"]
+
+continuous_transition_types = [
+    ["random_walk", "uniform"],
+    ["uniform", "uniform"]]
+
+classifier_parameters = {
+    "movement_var": 6.0,
+    "replay_speed": 1,
+    "place_bin_size": 2.5,
+    "continuous_transition_types": continuous_transition_types,
+    "discrete_transition_diag": 0.968,
+    "knot_spacing": 8,
+    "spike_model_penalty": 0.5,
+}
