@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 import sys
 from argparse import ArgumentParser
@@ -9,8 +10,8 @@ from dask.distributed import Client
 from replay_trajectory_classification import SortedSpikesClassifier
 from sklearn.model_selection import KFold
 from src.load_data import load_data
-from src.parameters import (EDGE_ORDER, EDGE_SPACING, classifier_parameters,
-                            state_names)
+from src.parameters import (EDGE_ORDER, EDGE_SPACING, PROCESSED_DATA_DIR,
+                            classifier_parameters, state_names)
 
 logging.basicConfig(level="INFO",
                     format="%(asctime)s %(message)s",
@@ -54,18 +55,21 @@ def sorted_spikes_1D_decoding(epoch_key):
                     state_names=state_names,
                 )
             )
-            classifier.save_model(
+            classifier.save_model(os.path.join(
+                PROCESSED_DATA_DIR,
                 f"{epoch_key[0]}_{epoch_key[1]:02d}_{epoch_key[2]:02d}_"
                 f"sortedspikes_{area}_model_fold{fold_ind}.pkl"
-            )
+            ))
 
         # concatenate cv classifier results
         results = xr.concat(results, dim="time")
 
         results.to_netcdf(
-            f"{epoch_key[0]}_{epoch_key[1]:02d}_{epoch_key[2]:02d}_"
-            f"sortedspikes_{area}_results.nc"
-        )
+            os.path.join(
+                PROCESSED_DATA_DIR,
+                f"{epoch_key[0]}_{epoch_key[1]:02d}_{epoch_key[2]:02d}_"
+                f"sortedspikes_{area}_results.nc"
+            ))
 
     logging.info("Done...\n\n")
 
@@ -104,6 +108,7 @@ def main():
     logging.info(f'Git Hash: {git_hash.rstrip()}')
 
     # Analysis Code
+    # Parameters for typhoon
     client_params = dict(n_workers=48, threads_per_worker=2, processes=True)
     with Client(**client_params) as client:
         logging.info(client)
