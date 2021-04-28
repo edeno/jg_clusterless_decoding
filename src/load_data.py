@@ -113,7 +113,7 @@ def load_data(epoch_key):
     bad_trode = [9, 16, 21]
 
     tetrode_keys = tetrode_info.loc[
-        (tetrode_info.area == "CA1")
+        (tetrode_info.area.str.upper() == "CA1")
         & (tetrode_info.deadchans.apply(lambda x: n_dead_chans(x)) < 4)
         & ~tetrode_info.nTrode.isin(tetrode_info.ref.dropna().unique())
         & ~tetrode_info.nTrode.isin(bad_trode)
